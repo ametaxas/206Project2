@@ -16,6 +16,7 @@ import re
 from bs4 import BeautifulSoup
 
 
+
 ## Part 1 -- Define your find_urls function here.
 ## INPUT: any string
 ## RETURN VALUE: a list of strings that represents all of the URLs in the input string
@@ -29,7 +30,7 @@ from bs4 import BeautifulSoup
 def find_urls(s):
     url_lst = []
     for item in s.split(" "):
-        x = re.findall('^http[^.]{2}', item)
+        x = re.findall('^http.*\..+.+$', item)
         for item in x:
             url_lst.append(item)
     return (url_lst)
@@ -44,8 +45,9 @@ def find_urls(s):
 ## http://www.michigandaily.com/section/opinion
 
 def grab_headlines():
-    pass
-    #Your code here
+    html = requests.get('http://www.michigandaily.com/section/opinion').text
+    soup = BeautifulSoup(html, 'html.parser')
+    print(soup('a'))
 
 
 
