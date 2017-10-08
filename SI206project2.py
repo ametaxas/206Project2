@@ -47,7 +47,8 @@ def find_urls(s):
 def grab_headlines():
     html = requests.get('http://www.michigandaily.com/section/opinion').text
     soup = BeautifulSoup(html, 'html.parser')
-    print(soup('a'))
+    return [headline.string for headline in soup.aside('a')]
+
 
 
 
