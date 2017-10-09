@@ -29,9 +29,9 @@ from bs4 import BeautifulSoup
 
 def find_urls(s):
     url_lst = []
-    for item in s.split(" "):
-        for item in re.findall('^http.*\..+.+$', item):
-            url_lst.append(item)
+    for item in s.split(" "): #for every word in the string
+        for url in re.findall('^http.*\..+.+$', item): #find everything that starts with http, has 2 periods, and has at least 2 characters following the last period
+            url_lst.append(url) #add whatever is in lists to url_lst (works even if an empty list is return in line 33)
     return (url_lst)
 
 
@@ -45,7 +45,7 @@ def find_urls(s):
 
 def grab_headlines():
     soup = BeautifulSoup(requests.get('http://www.michigandaily.com/section/opinion').text, 'html.parser')
-    return [headline.string for headline in soup.aside('a') if headline.get('target') == None]
+    return [headline.string for headline in soup.aside('a') if headline.get('target') == None] #lsit comprehension to pull the headlines found in the most read section, excluding the bottom link 
 
 
 
@@ -65,28 +65,22 @@ def grab_headlines():
 def get_umsi_data():
     umsi_titles = {}
     base_url = 'https://www.si.umich.edu/directory?field_person_firstname_value=&field_person_lastname_value=&rid=All&page='
-    def addPeople(dic,url):
+    def addPeople(dic,url): #function to add each person from the url to the dic umsi_titles
         soup = BeautifulSoup((requests.get(url, headers={'User-Agent': 'SI_CLASS'}).text), 'html.parser')
-        a = soup.div.find('div', {'class': "container3"})
-        for person in a.findAll('h2', attrs={'class': None}):
-            dic[person.string] = (person.parent.parent.parent.parent.find('div', {'class': 'field-name-field-person-titles'})).div.string
-    for item in range(13):
+        a = soup.div.find('div', {'class': "container3"}) #accessing the tag that contains the name info
+        for person in a.findAll('h2', attrs={'class': None}): #when the class is none (as opposed to element-invisible)
+            dic[person.string] = (person.parent.parent.parent.parent.find('div', {'class': 'field-name-field-person-titles'})).div.string #add an entry to the dic in which the key is the name and the value is the title
+    for item in range(13): #looping throught every directory page
         addPeople(umsi_titles,base_url+str(item))
     return umsi_titles
-#    url = 'https://www.si.umich.edu/directory?field_person_firstname_value=&field_person_lastname_value=&rid=All'
-#    while x != y:
-#        url = addPeople(url)
-
-
-
 ## PART 3 (b) Define a function called num_students.  
 ## INPUT: The dictionary from get_umsi_data().
 ## OUTPUT: Return number of PhD students in the data.  (Don't forget, I may change the input data)
 def num_students(data):
     PhD = 0
-    for person in data:
-        if 'PhD' in data[person]:
-            PhD += 1
+    for person in data: #for every person in the dictionary
+        if 'PhD' in data[person]: #if phd is in their title
+            PhD += 1 #add one to the phd variable
     return PhD
 
 
