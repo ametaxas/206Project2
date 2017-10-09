@@ -30,8 +30,7 @@ from bs4 import BeautifulSoup
 def find_urls(s):
     url_lst = []
     for item in s.split(" "):
-        x = re.findall('^http.*\..+.+$', item)
-        for item in x:
+        for item in re.findall('^http.*\..+.+$', item):
             url_lst.append(item)
     return (url_lst)
 
@@ -45,9 +44,9 @@ def find_urls(s):
 ## http://www.michigandaily.com/section/opinion
 
 def grab_headlines():
-    html = requests.get('http://www.michigandaily.com/section/opinion').text
-    soup = BeautifulSoup(html, 'html.parser')
-    return [headline.string for headline in soup.aside('a')]
+    soup = BeautifulSoup(requests.get('http://www.michigandaily.com/section/opinion').text, 'html.parser')
+    return [headline.string for headline in soup.aside('a') if headline.get('target') == None]
+
 
 
 
@@ -64,15 +63,31 @@ def grab_headlines():
 ## requests.get(base_url, headers={'User-Agent': 'SI_CLASS'}) 
 
 def get_umsi_data():
-    pass
-    #Your code here
+    umsi_titles = {}
+    base_url = 'https://www.si.umich.edu/directory?field_person_firstname_value=&field_person_lastname_value=&rid=All&page='
+    def addPeople(dic,url):
+        soup = BeautifulSoup((requests.get(url, headers={'User-Agent': 'SI_CLASS'}).text), 'html.parser')
+        a = soup.div.find('div', {'class': "container3"})
+        for person in a.findAll('h2', attrs={'class': None}):
+            dic[person.string] = (person.parent.parent.parent.parent.find('div', {'class': 'field-name-field-person-titles'})).div.string
+    for item in range(13):
+        addPeople(umsi_titles,base_url+str(item))
+    return umsi_titles
+#    url = 'https://www.si.umich.edu/directory?field_person_firstname_value=&field_person_lastname_value=&rid=All'
+#    while x != y:
+#        url = addPeople(url)
+
+
 
 ## PART 3 (b) Define a function called num_students.  
 ## INPUT: The dictionary from get_umsi_data().
 ## OUTPUT: Return number of PhD students in the data.  (Don't forget, I may change the input data)
 def num_students(data):
-    pass
-    #Your code here
+    PhD = 0
+    for person in data:
+        if 'PhD' in data[person]:
+            PhD += 1
+    return PhD
 
 
 
