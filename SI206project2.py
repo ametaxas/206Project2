@@ -30,7 +30,7 @@ from bs4 import BeautifulSoup
 def find_urls(s):
     url_lst = []
     for item in s.split(" "): #for every word in the string
-        for url in re.findall('^http.*\..+.+$', item): #find everything that starts with http, has 2 periods, and has at least 2 characters following the last period
+        for url in re.findall('^https?:\/\/.*\..{2,}', item): #find everything that starts with http, has 2 periods, and has at least 2 characters following the last period
             url_lst.append(url) #add whatever is in lists to url_lst (works even if an empty list is return in line 33)
     return (url_lst)
 
@@ -67,9 +67,9 @@ def get_umsi_data():
     base_url = 'https://www.si.umich.edu/directory?field_person_firstname_value=&field_person_lastname_value=&rid=All&page='
     def addPeople(dic,url): #function to add each person from the url to the dic umsi_titles
         soup = BeautifulSoup((requests.get(url, headers={'User-Agent': 'SI_CLASS'}).text), 'html.parser')
-        a = soup.div.find('div', {'class': "container3"}) #accessing the tag that contains the name info
-        for person in a.findAll('h2', attrs={'class': None}): #when the class is none (as opposed to element-invisible)
-            dic[person.string] = (person.parent.parent.parent.parent.find('div', {'class': 'field-name-field-person-titles'})).div.string #add an entry to the dic in which the key is the name and the value is the title
+        names = [item.string for item in soup.div.div.findAll('h2', {'class' : None, 'id' : None})]
+        titles = [item.div.string for item in soup.div.div.findAll('div', {'class': 'field-name-field-person-titles'})]
+        umsi_titles.update(dict(zip(names,titles)))
     for item in range(13): #looping throught every directory page
         addPeople(umsi_titles,base_url+str(item))
     return umsi_titles
